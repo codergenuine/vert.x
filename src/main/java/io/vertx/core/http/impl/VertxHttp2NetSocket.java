@@ -117,6 +117,11 @@ class VertxHttp2NetSocket<C extends Http2ConnectionBase> extends VertxHttp2Strea
   }
 
   @Override
+  public NetSocket fetch(long amount) {
+    return this;
+  }
+
+  @Override
   public NetSocket pause() {
     return this;
   }

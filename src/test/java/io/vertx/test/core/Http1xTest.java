@@ -2781,7 +2781,8 @@ public class Http1xTest extends HttpTest {
 
     for (int i = 0; i < requests; i++) {
       HttpClientRequest req = client.get("/", resp -> {
-        resp.bodyHandler(buffer -> {
+        resp.handler(buffer -> {
+          // Should check
         });
         resp.endHandler(v -> {
           if (count.decrementAndGet() == 0) {

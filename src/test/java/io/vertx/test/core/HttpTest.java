@@ -2599,6 +2599,8 @@ public abstract class HttpTest extends HttpTestBase {
 
   private void testFormUploadFile(String contentStr, boolean streamToDisk) throws Exception {
 
+    waitFor(2);
+
     Buffer content = Buffer.buffer(contentStr);
 
     AtomicInteger attributeCount = new AtomicInteger();
@@ -2621,7 +2623,7 @@ public abstract class HttpTest extends HttpTestBase {
           assertEquals("image/gif", upload.contentType());
           String uploadedFileName;
           if (!streamToDisk) {
-            upload.handler(buffer -> tot.appendBuffer(buffer));
+            upload.handler(tot::appendBuffer);
             uploadedFileName = null;
           } else {
             uploadedFileName = new File(testDir, UUID.randomUUID().toString()).getPath();
@@ -2630,12 +2632,14 @@ public abstract class HttpTest extends HttpTestBase {
           upload.endHandler(v -> {
             if (streamToDisk) {
               Buffer uploaded = vertx.fileSystem().readFileBlocking(uploadedFileName);
+              assertEquals(content.length(), uploaded.length());
               assertEquals(content, uploaded);
             } else {
               assertEquals(content, tot);
             }
             assertTrue(upload.isSizeAvailable());
             assertEquals(content.length(), upload.size());
+            complete();
           });
         });
         req.endHandler(v -> {
@@ -2654,7 +2658,7 @@ public abstract class HttpTest extends HttpTestBase {
           assertEquals(0, body.length());
         });
         assertEquals(0, attributeCount.get());
-        testComplete();
+        complete();
       });
 
       String boundary = "dLV9Wyq26L_-JQxk6ferf-RT153LhOO";
@@ -3808,6 +3812,7 @@ public abstract class HttpTest extends HttpTestBase {
       public HttpClientRequest handler(Handler<HttpClientResponse> handler) { throw new UnsupportedOperationException(); }
       public HttpClientRequest pause() { throw new UnsupportedOperationException(); }
       public HttpClientRequest resume() { throw new UnsupportedOperationException(); }
+      public HttpClientRequest fetch(long amount) { throw new UnsupportedOperationException(); }
       public HttpClientRequest endHandler(Handler<Void> endHandler) { throw new UnsupportedOperationException(); }
       public HttpClientRequest setFollowRedirects(boolean followRedirects) { throw new UnsupportedOperationException(); }
       public HttpClientRequest setChunked(boolean chunked) { throw new UnsupportedOperationException(); }
@@ -3849,6 +3854,7 @@ public abstract class HttpTest extends HttpTestBase {
       public HttpClientResponse exceptionHandler(Handler<Throwable> handler) { throw new UnsupportedOperationException(); }
       public HttpClientResponse handler(Handler<Buffer> handler) { throw new UnsupportedOperationException(); }
       public HttpClientResponse pause() { throw new UnsupportedOperationException(); }
+      public HttpClientResponse fetch(long amount) { throw new UnsupportedOperationException(); }
       public HttpClientResponse endHandler(Handler<Void> endHandler) { throw new UnsupportedOperationException(); }
       public HttpVersion version() { throw new UnsupportedOperationException(); }
       public int statusCode() { return status; }
